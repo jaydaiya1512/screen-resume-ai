@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Ranking</title>
+    <style>
+                 
+            body {
+                font-family: 'Poppins', sans-serif;
+                background-color: #0d1117;
+                color: #e6edf3;
+                text-align: center;
+                padding: 20px;
+            }
+
+            input, button {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                padding: 10px;
+                font-size: 16px;
+                border-radius: 10px;
+                color: #fff;
+                transition: all 0.3s ease-in-out;
+            }
+
+            textarea {
+                width: 90%;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(0, 255, 255, 0.3);
+                border-radius: 10px;
+                padding: 12px;
+                font-size: 25px;
+                font-weight: bold;  
+                color: #00ffff;
+                text-align: center; 
+                outline: none;
+                transition: all 0.3s ease-in-out;
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+                resize: vertical;
+            }
+
+            textarea:focus {
+                border: 2px solid #00ffff;
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+                transform: scale(1.02);
+            }
+
+
+            button {
+                cursor: pointer;
+                border: none;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+                transition: 0.3s;
+            }
+
+            button:hover {
+                box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+                transform: scale(1.05);
+            }
+
+            input[type="file"] {
+                padding: 8px;
+                cursor: pointer;
+            }
+
+            table {
+                width: 90%;
+                margin: 20px auto;
+                border-collapse: collapse;
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(5px);
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            th, td {
+                padding: 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            th {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+
+            h2, h3 {
+                font-size: 24px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #00ffff;
+                text-shadow: 0 0 10px #00ffff;
+            }
+         
+            input[type="file"] {
+                display: none;
+            }
+
+            .job-description-label {
+                font-size: 20px;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #00ffff;
+                text-shadow: 0 0 10px #00ffff, 0 0 20px rgba(0, 255, 255, 0.5);
+                display: block;
+                margin-bottom: 10px;
+            }
+
+        
+            .custom-file-upload {
+                display: inline-block;
+                padding: 12px 20px;
+                background: rgba(0, 255, 255, 0.2);
+                border: 2px solid rgba(0, 255, 255, 0.5);
+                color: #00ffff;
+                font-size: 16px;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease-in-out;
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+
+          
+            .custom-file-upload:hover {
+                background: rgba(0, 255, 255, 0.4);
+                box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+                transform: scale(1.05);
+            }
+
+
+    </style>
+</head>
+<body>
+    <h2>AI Resume Screening & Ranking System</h2>
+
+    <form id="upload-form">
+        <br><br>
+        <label class="job-description-label">Job Description:</label><br>
+        <textarea id="job_description" name="job_description" rows="2" cols="50"></textarea><br><br>
+
+        <label for="resumes" class="custom-file-upload">
+            📂 Choose Files
+        </label>
+        <input id="resumes" type="file" name="resumes" multiple accept=".pdf">
+        <br><br>        
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <h3>Results:</h3>
+    <table border="1">
+        <thead>
+            <tr><th>Resume</th><th>Score</th></tr>
+        </thead>
+        <tbody id="results"></tbody>
+    </table>
+
+    <script>
+        document.getElementById("upload-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let formData = new FormData();
+            formData.append("job_description", document.getElementById("job_description").value);
+            let files = document.getElementById("resumes").files;
+            for (let i = 0; i < files.length; i++) {
+                formData.append("resumes", files[i]);
+            }
+
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultsTable = document.getElementById("results");
+                resultsTable.innerHTML = "";
+                data.forEach(res => {
+                    let row = `<tr><td>${res.resume}</td><td>${res.score.toFixed(4)}</td></tr>`;
+                    resultsTable.innerHTML += row;
+                });
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+</html>
